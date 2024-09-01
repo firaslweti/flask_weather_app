@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+</head>
+<body>
+    <div id="loader" class="loader">
+        <lottie-player 
+            src="{{ url_for('static', filename='loader.json') }}"  
+            background="transparent"  
+            speed="1"  
+            style="width: 500px; height: 500px;"  
+            loop  
+            autoplay>
+        </lottie-player>
+    </div>
+    <div id="app-content" class="hidden">
+        <div class="container">
+            <h1>Weather App</h1>
+            <center><lottie-player 
+            src="{{ url_for('static', filename=animation) }}"  
+            background="transparent"  
+            speed="1"  
+            style="width: 300px; height: 300px;"  
+            loop  
+            autoplay>
+        </lottie-player></center>
+            <form method="post" action="/">
+                <label for="location">Enter Location:</label>
+                <input type="text" id="location" name="location" placeholder="City name" value="{{ city }}">
+                <button type="submit">Get Weather</button>
+            </form>
+            {% if error %}
+                <p class="error">{{ error }}</p>
+            {% else %}
+                <p class="weather-info">The weather in {{ city }} is: {{ weather }}</p>
+                <p class="temperature">The temperature in {{ city }} is: {{ temp }}ºC</p>
+                {% if animation %}
+                    <div class="lottie-container">
+                       
+                    </div>
+                {% endif %}
+            {% endif %}
+            <p>by firas lweti</p>
+        </div>
+    </div>
+    
+    <script>
+        // Show loader for 3 seconds, then hide and show app content
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('app-content').classList.remove('hidden');
+            }, 3000); // 3000 milliseconds = 3 seconds
+        });
+
+        // Detect user's location and update the input field
+        window.addEventListener('load', function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    fetch(`https://api.opencagedata.com/geocode/v1/json?q=${lat}+${lon}&key=YOUR_OPENCAGE_API_KEY`)
+                        .then(response => response.json())
+                        .then(data => {
+                            const city = data.results[0].components.city || data.results[0].components.town;
+                            document.getElementById('location').value = city;
+                        });
+                });
+            }
+        });
+    </script>
+    
+</body>
+</html>
